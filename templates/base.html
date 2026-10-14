@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Grama/Ward Sachivalayam Portal{% endblock %} - Govt of Andhra Pradesh</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        govblue: {
+                            50: '#f0f5ff',
+                            100: '#e0ecff',
+                            500: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#0f172a'
+                        },
+                        govgreen: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857'
+                        },
+                        govgold: {
+                            500: '#f59e0b',
+                            600: '#d97706'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Official Banner -->
+    <div class="bg-govblue-950 text-slate-300 text-xs py-1.5 px-4 border-b border-govblue-900">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-medium text-white">Government of Andhra Pradesh</span>
+                <span class="text-slate-400">|</span>
+                <span>Grama & Ward Sachivalayam Portal (గ్రామ / వార్డు సచివాలయం)</span>
+            </div>
+            <!-- Official Helpline / Date in Top Bar -->
+            <div class="flex items-center gap-3 text-xs text-slate-300">
+                <span><i data-lucide="phone-call" class="w-3 h-3 inline mr-1 text-emerald-400"></i> Toll-Free Citizen Helpline: <strong class="text-white">1902</strong></span>
+                <span class="text-slate-500">|</span>
+                <span>Spandana Redressal</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <!-- Portal Logo & Brand -->
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3 group">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-govblue-900 via-govblue-800 to-govgreen-600 flex items-center justify-center text-white shadow-md shadow-govblue-900/20 group-hover:scale-105 transition">
+                        <i data-lucide="landmark" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-xl tracking-tight text-govblue-950">SACHIVALAYAM</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">CITIZEN PORTAL</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">Village & Ward Secretariat Services Redressal System</p>
+                    </div>
+                </a>
+
+                <!-- Nav Links & Auth Buttons -->
+                <div class="flex items-center gap-4">
+                    <a href="{{ url_for('index') }}" class="text-sm font-semibold text-slate-600 hover:text-govblue-700 transition hidden md:block">
+                        Home
+                    </a>
+                    <a href="{{ url_for('track') }}" class="text-sm font-semibold text-slate-600 hover:text-govblue-700 transition flex items-center gap-1.5 hidden md:flex">
+                        <i data-lucide="search" class="w-4 h-4"></i> Track Status
+                    </a>
+
+                    {% if session.get('user_id') %}
+                        <!-- Role-based Dashboard Link -->
+                        {% if session.get('role') == 'admin' %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="px-3.5 py-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-bold text-sm flex items-center gap-1.5 hover:bg-purple-100 transition">
+                                <i data-lucide="shield-check" class="w-4 h-4 text-purple-600"></i> Admin Station
+                            </a>
+                        {% elif session.get('role') == 'officer' %}
+                            <a href="{{ url_for('officer_dashboard') }}" class="px-3.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-sm flex items-center gap-1.5 hover:bg-emerald-100 transition">
+                                <i data-lucide="briefcase" class="w-4 h-4 text-emerald-600"></i> Officer Desk
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('citizen_dashboard') }}" class="px-3.5 py-1.5 rounded-lg bg-govblue-50 text-govblue-800 border border-govblue-200 font-bold text-sm flex items-center gap-1.5 hover:bg-govblue-100 transition">
+                                <i data-lucide="user" class="w-4 h-4 text-govblue-600"></i> Citizen Services
+                            </a>
+                        {% endif %}
+
+                        <!-- User Profile Pill -->
+                        <div class="flex items-center gap-3 pl-2 border-l border-slate-200">
+                            <div class="text-right hidden sm:block">
+                                <div class="text-xs font-bold text-slate-800">{{ session.get('name') }}</div>
+                                <div class="text-[11px] text-slate-500 capitalize flex items-center justify-end gap-1">
+                                    <span>{{ session.get('role') }}</span>
+                                    {% if session.get('role') == 'officer' %}
+                                        {% if session.get('approval_status') == 'approved' %}
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500" title="Approved"></span>
+                                        {% else %}
+                                            <span class="w-2 h-2 rounded-full bg-amber-500" title="Pending Approval"></span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{{ url_for('logout') }}" title="Sign Out" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+                                <i data-lucide="log-out" class="w-5 h-5"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- Guest Navigation -->
+                        <div class="flex items-center gap-2">
+                            <a href="{{ url_for('login') }}" class="px-4 py-2 rounded-lg text-sm font-semibold text-govblue-900 hover:bg-slate-100 transition">
+                                Sign In
+                            </a>
+                            <a href="{{ url_for('register') }}" class="px-4 py-2 rounded-lg text-sm font-semibold bg-govblue-900 hover:bg-govblue-950 text-white shadow-sm shadow-govblue-900/30 transition flex items-center gap-1.5">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i> Register
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% set alert_classes = {
+                        'success': 'bg-emerald-50 border-emerald-300 text-emerald-800',
+                        'danger': 'bg-rose-50 border-rose-300 text-rose-800',
+                        'warning': 'bg-amber-50 border-amber-300 text-amber-800',
+                        'info': 'bg-blue-50 border-blue-300 text-blue-800'
+                    } %}
+                    <div class="p-4 mb-3 border rounded-xl shadow-sm flex items-start justify-between gap-3 {{ alert_classes.get(category, 'bg-slate-100 border-slate-300 text-slate-800') }}">
+                        <div class="flex items-center gap-3">
+                            {% if category == 'success' %}
+                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+                            {% elif category == 'danger' %}
+                                <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 shrink-0"></i>
+                            {% elif category == 'warning' %}
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                            {% else %}
+                                <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                            {% endif %}
+                            <span class="text-sm font-medium">{{ message }}</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Block -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-govblue-950 text-slate-400 text-sm mt-auto border-t border-govblue-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="landmark" class="w-6 h-6 text-emerald-400"></i>
+                        <span class="font-bold text-white text-lg">Grama & Ward Sachivalayam Portal</span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed max-w-md">
+                        Decentralized citizen service delivery and grievance redressal system. Dedicated to door-step governance, seamless certificate issuance, and community-verified problem resolution.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white text-xs uppercase tracking-wider mb-3">Core Features</h4>
+                    <ul class="text-xs space-y-2">
+                        <li><a href="{{ url_for('track') }}" class="hover:text-emerald-400 transition">Track Grievance / Certificate</a></li>
+                        <li><a href="{{ url_for('register') }}" class="hover:text-emerald-400 transition">Citizen Registration</a></li>
+                        <li><a href="{{ url_for('register') }}" class="hover:text-emerald-400 transition">Officer Portal Registration</a></li>
+                        <li><a href="{{ url_for('login') }}" class="hover:text-emerald-400 transition">Admin Approval Station</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white text-xs uppercase tracking-wider mb-3">System Assurance</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        <strong class="text-emerald-400">Citizen Confirmation:</strong> Officer work resolution is officially sealed as <strong class="text-white">DONE</strong> only after direct citizen verification & satisfaction.
+                    </p>
+                </div>
+            </div>
+            <div class="pt-6 border-t border-govblue-900/60 flex flex-wrap justify-between items-center text-xs text-slate-500 gap-2">
+                <span>© 2026 Sachivalayam Portal. Government of Andhra Pradesh. All rights reserved.</span>
+                <span class="text-emerald-400 font-mono">Status: Connected to SQLite Engine</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

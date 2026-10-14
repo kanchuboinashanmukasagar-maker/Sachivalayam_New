@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - Sachivalayam Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-8">
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="p-8 bg-gradient-to-r from-govblue-950 to-govblue-900 text-white text-center">
+            <div class="w-12 h-12 rounded-2xl bg-white/10 text-emerald-400 flex items-center justify-center mx-auto mb-3 border border-white/20">
+                <i data-lucide="lock" class="w-6 h-6"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">Portal Authentication</h1>
+            <p class="text-xs text-slate-300 mt-1">Single Sign-On for Admin, Officers & Citizens</p>
+        </div>
+
+        <div class="p-8 space-y-6">
+            <!-- Login Form -->
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Registered Email</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                        <input type="email" name="email" id="login_email" placeholder="name@domain.gov.in" required
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-govblue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+                    <div class="relative">
+                        <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                        <input type="password" name="password" id="login_password" placeholder="••••••••" required
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-govblue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-govblue-900 hover:bg-govblue-950 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>Sign In to Dashboard</span>
+                </button>
+            </form>
+
+            <!-- Information Notice -->
+            <div class="pt-4 border-t border-slate-100 text-center">
+                <p class="text-[11px] text-slate-400">
+                    Protected government portal. Unauthorized access attempts are monitored and recorded.
+                </p>
+            </div>
+
+            <!-- Footer links -->
+            <div class="text-center text-xs text-slate-500 pt-2">
+                Don't have an account yet? 
+                <a href="{{ url_for('register') }}" class="font-bold text-govblue-700 hover:underline">Register as Citizen or Officer</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Certificate - {{ cert.application_no }}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+            }
+            .cert-container {
+                border: 3px double #1e3a8a !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-serif text-slate-900 min-h-screen py-8 px-4 flex flex-col items-center">
+
+    <!-- Action Toolbar (Hidden in Print) -->
+    <div class="no-print max-w-4xl w-full flex justify-between items-center mb-6">
+        <a href="{{ url_for('citizen_dashboard') }}" class="px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-sans font-bold text-xs hover:bg-slate-50 transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Return to Dashboard</span>
+        </a>
+        <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-sans font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Print Official Certificate</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Official Certificate Frame -->
+    <div class="cert-container max-w-4xl w-full bg-white border-[6px] border-double border-govblue-900 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+        
+        <!-- Watermark -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
+            <i data-lucide="landmark" class="w-[500px] h-[500px] text-govblue-950"></i>
+        </div>
+
+        <!-- Corner Ornaments -->
+        <div class="absolute top-2 left-2 text-govblue-900 text-xs font-sans">✦</div>
+        <div class="absolute top-2 right-2 text-govblue-900 text-xs font-sans">✦</div>
+        <div class="absolute bottom-2 left-2 text-govblue-900 text-xs font-sans">✦</div>
+        <div class="absolute bottom-2 right-2 text-govblue-900 text-xs font-sans">✦</div>
+
+        <!-- Top Header -->
+        <div class="text-center pb-6 border-b-2 border-govblue-900 space-y-1">
+            <div class="text-xs uppercase tracking-widest text-slate-600 font-sans font-bold">Government of Andhra Pradesh</div>
+            <div class="text-sm font-sans font-bold text-govblue-900 uppercase">Revenue & Panchayat Raj Department</div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-govblue-950 tracking-tight uppercase mt-2">
+                {{ cert.certificate_type }}
+            </h1>
+            <p class="text-xs text-slate-500 font-sans">
+                Issued by {{ cert.sachivalayam_name }} ({{ cert.mandal }} Mandal, {{ cert.district }} District)
+            </p>
+        </div>
+
+        <!-- Reference & Barcode Bar with Photo -->
+        <div class="flex flex-wrap justify-between items-center py-4 border-b border-slate-200 font-sans text-xs text-slate-600 gap-4">
+            <div class="space-y-1.5">
+                <div>
+                    <span class="font-bold text-slate-800">Application Reference No:</span> 
+                    <span class="font-mono font-bold text-govblue-900">{{ cert.application_no }}</span>
+                </div>
+                <div>
+                    <span class="font-bold text-slate-800">Certificate No:</span>
+                    <span class="font-mono font-bold text-purple-900">{{ payload.certificate_id or cert.application_no }}</span>
+                </div>
+                <div>
+                    <span class="font-bold text-slate-800">Date of Issue:</span>
+                    <span class="font-mono">{{ payload.date_of_issue or cert.completed_at }}</span>
+                </div>
+            </div>
+
+            <!-- Applicant Passport Photo Frame -->
+            <div class="border-2 border-slate-400 p-1 rounded-lg bg-slate-50 text-center w-24 h-28 flex flex-col items-center justify-center shrink-0 shadow-sm">
+                {% if cert.applicant_photo %}
+                    <img src="{{ url_for('static', filename=cert.applicant_photo) }}" alt="Applicant Photograph" class="w-full h-full object-cover rounded">
+                {% else %}
+                    <i data-lucide="user" class="w-10 h-10 text-slate-400 mb-1"></i>
+                    <span class="text-[8px] text-slate-400 uppercase font-bold tracking-tight">Passport Photo</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Body Certificate Text -->
+        <div class="py-8 space-y-6 text-sm sm:text-base leading-relaxed text-slate-800">
+            <p>
+                This is to officially certify that Sri / Smt / Kum <strong class="font-bold text-govblue-950 underline decoration-govblue-900 underline-offset-4">{{ cert.applicant_name }}</strong>, 
+                {% if cert.relation_name %}
+                    {{ cert.relation_type }} of <strong class="font-bold text-slate-900">{{ cert.relation_name }}</strong>,
+                {% endif %}
+                residing at <span class="font-medium text-slate-900">{{ cert.address }}</span>, situated in the jurisdiction of <strong class="font-bold">{{ cert.sachivalayam_name }}</strong>, Mandal of <strong>{{ cert.mandal }}</strong>, District of <strong>{{ cert.district }}</strong>, Andhra Pradesh.
+            </p>
+
+            {% if 'Income' in cert.certificate_type or cert.annual_income %}
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 font-sans text-xs space-y-1">
+                    <div class="font-bold text-slate-900 text-sm">Income Assessment Details:</div>
+                    <p class="text-slate-700">
+                        Based on the local inquiry and scrutiny by the Village Revenue Officer & Sachivalayam Secretary, the gross annual household income from all sources is assessed at:
+                    </p>
+                    <div class="text-base font-black text-govblue-950 pt-1">
+                        Rs. {{ "{:,.2f}".format(cert.annual_income or 95000) }} /- 
+                        <span class="text-xs font-normal text-slate-600">({{ "Rupees Ninety Five Thousand Only" if cert.annual_income == 95000 else "Rupees Only" }})</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if 'Caste' in cert.certificate_type or cert.caste_category %}
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 font-sans text-xs space-y-1">
+                    <div class="font-bold text-slate-900 text-sm">Community / Caste Verification:</div>
+                    <p class="text-slate-700">
+                        It is certified that the applicant belongs to the <strong class="text-govblue-950 text-sm">{{ cert.caste_category or 'Backward Class' }}</strong> community recognized as a notified category in the state of Andhra Pradesh.
+                    </p>
+                </div>
+            {% endif %}
+
+            <p class="text-xs font-sans text-slate-500">
+                This certificate is granted for the bona fide purpose of: <strong class="text-slate-700">{{ cert.purpose }}</strong>.
+                {% if cert.service_type == 'renewal' %}
+                    <span>(Renewal verified against previous Certificate No: <strong class="font-mono text-purple-800">{{ cert.previous_cert_no }}</strong>)</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Official Signatures & Seal -->
+        <div class="pt-8 border-t-2 border-slate-200 flex flex-wrap justify-between items-end gap-6 font-sans">
+            <!-- QR Verification Code -->
+            <div class="flex items-center gap-3">
+                <div class="w-20 h-20 bg-slate-900 text-white p-2 rounded-lg flex flex-col items-center justify-center font-mono text-[8px] text-center shrink-0 border-2 border-slate-300">
+                    <i data-lucide="qr-code" class="w-12 h-12 text-white"></i>
+                    <span class="text-[7px] text-emerald-400 mt-0.5">AP-VERIFIED</span>
+                </div>
+                <div class="text-[11px] text-slate-500 max-w-[200px]">
+                    <span class="font-bold text-slate-700 block">Digital Verification Hash</span>
+                    <span class="font-mono text-[10px] break-all">{{ payload.qr_hash or 'APGS-VALIDATED-2026' }}</span>
+                    <span class="text-[10px] text-emerald-700 font-semibold block mt-0.5">Digitally Authenticated</span>
+                </div>
+            </div>
+
+            <!-- Officer Digital Stamp -->
+            <div class="text-right space-y-1">
+                <div class="inline-block p-3 rounded-2xl border-2 border-dashed border-govblue-900 bg-govblue-50/50 text-center mb-1">
+                    <div class="text-[10px] font-bold text-govblue-900 uppercase">Digitally Signed & Sealed</div>
+                    <div class="text-xs font-extrabold text-slate-900 mt-0.5">{{ cert.officer_name or 'Sachivalayam Secretary' }}</div>
+                    <div class="text-[10px] text-slate-600">{{ cert.officer_designation or 'Authorized Competent Authority' }}</div>
+                    <div class="text-[9px] text-slate-400 font-mono mt-0.5">{{ payload.date_of_issue or cert.completed_at }}</div>
+                </div>
+                <div class="text-[10px] text-slate-400">
+                    Validity: <strong class="text-slate-700">{{ payload.valid_until or 'Valid for 1 Year' }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legal Disclaimer Footer -->
+        <div class="mt-8 pt-4 border-t border-slate-100 text-[10px] text-slate-400 text-center font-sans">
+            Note: This is a system-generated and digitally confirmed Andhra Pradesh Grama/Ward Sachivalayam electronic certificate. Authenticity can be verified at any time using the portal tracker.
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

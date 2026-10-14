@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Station - Sachivalayam Management{% endblock %}
+
+{% block content %}
+<div class="space-y-8 py-4">
+
+    <!-- Top Admin Header -->
+    <div class="bg-gradient-to-r from-purple-950 via-purple-900 to-govblue-950 rounded-3xl p-6 sm:p-8 text-white border border-purple-800 shadow-xl flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    District Nodal Administration
+                </span>
+                <span class="text-xs text-purple-300 font-mono">AP-ADM-001</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Officer Authorization & Oversight Station</h1>
+            <p class="text-xs sm:text-sm text-purple-200 mt-1">Review and grant dashboard permissions to newly registered Sachivalayam officers.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-white text-xs font-bold border border-white/20 backdrop-blur-sm">
+                {{ session.get('name') }} (Superadmin)
+            </span>
+        </div>
+    </div>
+
+    <!-- Admin Metric Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Pending Approvals Card (Urgent) -->
+        <div class="bg-white rounded-2xl p-5 border border-amber-300/80 shadow-sm relative overflow-hidden">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="text-3xl font-black text-amber-600">{{ metrics.pending_officers }}</div>
+                    <div class="text-xs font-bold text-slate-700 mt-1">Pending Officer Approvals</div>
+                    <div class="text-[11px] text-slate-400">Waiting for your permission</div>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                </div>
+            </div>
+            {% if metrics.pending_officers > 0 %}
+                <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></span>
+            {% endif %}
+        </div>
+
+        <!-- Active Officers -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="text-3xl font-black text-emerald-600">{{ metrics.approved_officers }}</div>
+                    <div class="text-xs font-bold text-slate-700 mt-1">Active Officers</div>
+                    <div class="text-[11px] text-slate-400">Granted dashboard access</div>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complaints Awaiting Citizen Confirmation -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="text-3xl font-black text-blue-600">{{ metrics.complaints_total }}</div>
+                    <div class="text-xs font-bold text-slate-700 mt-1">Grievances Redressed</div>
+                    <div class="text-[11px] text-emerald-600 font-semibold">{{ metrics.complaints_done }} Confirmed DONE</div>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificates Done -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="text-3xl font-black text-indigo-600">{{ metrics.certs_done }}</div>
+                    <div class="text-xs font-bold text-slate-700 mt-1">Certificates Issued</div>
+                    <div class="text-[11px] text-slate-400">Out of {{ metrics.certs_total }} applications</div>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="file-badge" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: PENDING OFFICER REGISTRATIONS (Action Required) -->
+    <div class="bg-white rounded-3xl border border-amber-200 shadow-sm overflow-hidden">
+        <div class="p-6 bg-amber-50/70 border-b border-amber-200 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Officer Authorization Queue</h2>
+                    <p class="text-xs text-slate-500">
+                        These officers registered on the portal. They <strong class="text-amber-800">cannot view or enter their dashboard</strong> until you grant approval.
+                    </p>
+                </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-amber-200 text-amber-900 font-bold text-xs">
+                {{ pending_officers|length }} Pending Action
+            </span>
+        </div>
+
+        <div class="p-6">
+            {% if pending_officers %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                                <th class="pb-3 pl-2">Applicant Officer</th>
+                                <th class="pb-3">Designation & ID</th>
+                                <th class="pb-3">Assigned Secretariat</th>
+                                <th class="pb-3">Contact</th>
+                                <th class="pb-3">Registered On</th>
+                                <th class="pb-3 text-right pr-2">Permission Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for officer in pending_officers %}
+                                <tr class="hover:bg-amber-50/40 transition">
+                                    <td class="py-4 pl-2 font-bold text-slate-900">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center shrink-0">
+                                                {{ officer.name[0] }}
+                                            </div>
+                                            <div>
+                                                <div>{{ officer.name }}</div>
+                                                <div class="text-[11px] font-normal text-slate-400">{{ officer.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4">
+                                        <div class="font-semibold text-slate-800">{{ officer.designation or 'Officer' }}</div>
+                                        <div class="text-[11px] font-mono text-purple-700">{{ officer.employee_id or 'N/A' }}</div>
+                                    </td>
+                                    <td class="py-4">
+                                        <div class="font-medium text-slate-800">{{ officer.sachivalayam_name or 'Unassigned' }}</div>
+                                        <div class="text-[11px] text-slate-400">{{ officer.mandal }}, {{ officer.district }}</div>
+                                    </td>
+                                    <td class="py-4 font-mono text-slate-600">
+                                        <div>{{ officer.phone }}</div>
+                                        <div class="text-[10px] text-slate-400">Aadhaar: {{ officer.aadhaar or 'N/A' }}</div>
+                                    </td>
+                                    <td class="py-4 font-mono text-slate-500 text-[11px]">
+                                        {{ officer.created_at }}
+                                    </td>
+                                    <td class="py-4 text-right pr-2">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <!-- Approve Form -->
+                                            <form action="{{ url_for('admin_approve_officer', officer_id=officer.id) }}" method="POST" class="inline">
+                                                <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                                    <span>Grant Permission (Approve)</span>
+                                                </button>
+                                            </form>
+                                            <!-- Reject Form -->
+                                            <form action="{{ url_for('admin_reject_officer', officer_id=officer.id) }}" method="POST" class="inline">
+                                                <button type="submit" onclick="return confirm('Reject this officer registration?')" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition flex items-center gap-1">
+                                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                                    <span>Reject</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-8 text-center text-slate-400">
+                    <i data-lucide="check-check" class="w-10 h-10 mx-auto text-emerald-500 mb-2"></i>
+                    <p class="font-bold text-slate-700">All Officer Registrations Cleared!</p>
+                    <p class="text-xs text-slate-400 mt-1">There are no pending officer access requests awaiting your approval.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Section 2: All Sachivalayam Officers Directory -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">Sachivalayam Officers Directory</h2>
+                <p class="text-xs text-slate-500">Complete staff list across Grama & Ward Secretariats</p>
+            </div>
+            <span class="text-xs font-mono font-bold text-slate-500">{{ all_officers|length }} Total Officers</span>
+        </div>
+
+        <div class="p-6 overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th class="pb-3 pl-2">Officer</th>
+                        <th class="pb-3">Secretariat</th>
+                        <th class="pb-3">Designation</th>
+                        <th class="pb-3">Workload (Complaints / Certs)</th>
+                        <th class="pb-3">Access Status</th>
+                        <th class="pb-3 text-right pr-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for o in all_officers %}
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="py-3.5 pl-2">
+                                <div class="font-bold text-slate-800">{{ o.name }}</div>
+                                <div class="text-[11px] text-slate-400">{{ o.email }}</div>
+                            </td>
+                            <td class="py-3.5">
+                                <div class="font-medium text-slate-700">{{ o.sachivalayam_name or 'District Office' }}</div>
+                                <div class="text-[11px] text-slate-400">{{ o.district }}</div>
+                            </td>
+                            <td class="py-3.5 text-slate-700 font-medium">
+                                {{ o.designation or 'Officer' }}
+                            </td>
+                            <td class="py-3.5 font-mono text-slate-600">
+                                <span class="text-blue-700 font-bold">{{ o.assigned_complaints }}</span> complaints / 
+                                <span class="text-purple-700 font-bold">{{ o.assigned_certs }}</span> certs
+                            </td>
+                            <td class="py-3.5">
+                                {% if o.approval_status == 'approved' %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px]">
+                                        <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i> APPROVED
+                                    </span>
+                                {% elif o.approval_status == 'pending' %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-[11px]">
+                                        <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i> PENDING
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 font-bold text-[11px]">
+                                        <i data-lucide="x-circle" class="w-3 h-3 text-rose-600"></i> REJECTED
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3.5 text-right pr-2">
+                                {% if o.approval_status == 'approved' %}
+                                    <form action="{{ url_for('admin_reject_officer', officer_id=o.id) }}" method="POST" class="inline">
+                                        <input type="hidden" name="reason" value="Suspended by District Administrator">
+                                        <button type="submit" onclick="return confirm('Revoke officer permissions?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-semibold transition">
+                                            Revoke Access
+                                        </button>
+                                    </form>
+                                {% elif o.approval_status == 'rejected' %}
+                                    <form action="{{ url_for('admin_approve_officer', officer_id=o.id) }}" method="POST" class="inline">
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition">
+                                            Re-Approve
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form action="{{ url_for('admin_approve_officer', officer_id=o.id) }}" method="POST" class="inline">
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                                            Approve Now
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 3: Overview of All Complaints & Certificates -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Complaints across district -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center justify-between">
+                <span>Recent Citizen Grievances</span>
+                <span class="text-xs text-slate-400 font-normal">District Wide</span>
+            </h3>
+            <div class="space-y-3">
+                {% for c in recent_complaints %}
+                    <div class="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 text-xs flex justify-between items-start gap-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-900">{{ c.ticket_id }}</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px]">{{ c.category }}</span>
+                            </div>
+                            <p class="font-medium text-slate-800 mt-1">{{ c.title }}</p>
+                            <p class="text-[11px] text-slate-500 mt-0.5">{{ c.sachivalayam_name }} &bull; Citizen: {{ c.citizen_name }}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            {% if c.status == 'DONE' %}
+                                <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">DONE</span>
+                            {% elif c.status == 'WORK_COMPLETED_PENDING_CONFIRMATION' %}
+                                <span class="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded">Pending Citizen Confirm</span>
+                            {% else %}
+                                <span class="text-blue-700 font-medium">{{ c.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Certificates -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center justify-between">
+                <span>Recent Certificate Applications</span>
+                <span class="text-xs text-slate-400 font-normal">New & Renewals</span>
+            </h3>
+            <div class="space-y-3">
+                {% for cert in recent_certificates %}
+                    <div class="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 text-xs flex justify-between items-start gap-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-900">{{ cert.application_no }}</span>
+                                <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[10px] uppercase font-bold">{{ cert.service_type }}</span>
+                            </div>
+                            <p class="font-medium text-slate-800 mt-1">{{ cert.certificate_type }}</p>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Applicant: {{ cert.applicant_name }} &bull; {{ cert.sachivalayam_name }}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            {% if cert.status == 'DONE' %}
+                                <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">DONE</span>
+                            {% elif cert.status == 'WORK_COMPLETED_PENDING_CONFIRMATION' %}
+                                <span class="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded">Pending Citizen Confirm</span>
+                            {% else %}
+                                <span class="text-blue-700 font-medium">{{ cert.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

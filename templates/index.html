@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Grama/Ward Sachivalayam Citizen Services{% endblock %}
+
+{% block content %}
+<div class="space-y-12 py-4">
+
+    <!-- Hero Section -->
+    <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-govblue-950 via-govblue-900 to-slate-900 text-white p-8 sm:p-12 shadow-xl border border-govblue-800/50">
+        <div class="absolute -right-16 -top-16 w-80 h-80 bg-govgreen-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold mb-4 border border-emerald-500/30">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                Direct Citizen-to-Secretariat Redressal System
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white mb-4">
+                Empowering Citizens at the <span class="text-emerald-400">Doorstep</span>.
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg mb-8 leading-relaxed">
+                Lodge grievances, apply for fresh or renewed certificates, and track government services in real time. Officers submit work resolution, but <strong class="text-white underline decoration-emerald-400 decoration-2">only you decide</strong> when the work is officially <span class="text-emerald-400 font-bold">DONE</span>.
+            </p>
+
+            <!-- Quick Track Input Bar -->
+            <form action="{{ url_for('track') }}" method="GET" class="bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 flex flex-col sm:flex-row gap-2 max-w-xl shadow-2xl">
+                <div class="flex-grow flex items-center gap-3 px-3">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-300"></i>
+                    <input type="text" name="q" placeholder="Enter Ticket ID (e.g. GS-CMP-2026-102) or App No" 
+                           class="w-full bg-transparent border-none text-white placeholder-slate-400 text-sm focus:outline-none py-2" required>
+                </div>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                    <span>Track Status</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i data-lucide="landmark" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-slate-800">{{ stats.secretariats }}</div>
+                <div class="text-xs font-semibold text-slate-500">Secretariats Active</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <i data-lucide="user-check" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-slate-800">{{ stats.active_officers }}</div>
+                <div class="text-xs font-semibold text-slate-500">Approved Officers</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <i data-lucide="message-square" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-slate-800">{{ stats.total_complaints }}</div>
+                <div class="text-xs font-semibold text-slate-500">Grievances Filed</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <i data-lucide="check-check" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-slate-800">{{ stats.resolved_complaints }}</div>
+                <div class="text-xs font-semibold text-slate-500">Confirmed "DONE"</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4 col-span-2 lg:col-span-1">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <i data-lucide="file-badge" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-slate-800">{{ stats.certificates_issued }}</div>
+                <div class="text-xs font-semibold text-slate-500">Certificates Issued</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- The 3 Portals / Roles Section -->
+    <div>
+        <div class="text-center max-w-2xl mx-auto mb-8">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Dedicated Portals for Every Stakeholder</h2>
+            <p class="text-sm text-slate-500 mt-2">Built with strict separation of duties and administrative governance.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 1. Citizen Portal Card -->
+            <div class="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm hover:shadow-lg transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mb-6 group-hover:scale-110 transition">
+                        <i data-lucide="users" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Public Services</span>
+                    <h3 class="text-xl font-bold text-slate-900 mt-3 mb-2">Citizen Portal</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                        Lodge civic complaints, apply for fresh certificates, renew expiring certificates, and confirm work completion with your direct sign-off.
+                    </p>
+                    <ul class="text-xs text-slate-600 space-y-2.5 mb-6">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Grievances redressal for sanitation, power, water
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Income, Caste, Residence & Nativity certificates
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            <strong class="text-slate-800">Final Done confirmation power</strong>
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex gap-2 pt-4 border-t border-slate-100">
+                    <a href="{{ url_for('login') }}" class="flex-1 text-center py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition">
+                        Citizen Login
+                    </a>
+                    <a href="{{ url_for('register') }}" class="flex-1 text-center py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+                        Register
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. Sachivalayam Officer Card -->
+            <div class="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm hover:shadow-lg transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-6 group-hover:scale-110 transition">
+                        <i data-lucide="briefcase" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Secretariat Field Staff</span>
+                    <h3 class="text-xl font-bold text-slate-900 mt-3 mb-2">Sachivalayam Officer Desk</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                        For Digital Assistants, Panchayat Secretaries, and Welfare Assistants. Access granted <strong class="text-slate-800">only after Admin approval</strong>.
+                    </p>
+                    <ul class="text-xs text-slate-600 space-y-2.5 mb-6">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Registration requires Admin approval check
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Inspect citizen complaints & verify applications
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Mark "Work Completed" for citizen verification
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex gap-2 pt-4 border-t border-slate-100">
+                    <a href="{{ url_for('login') }}" class="flex-1 text-center py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition">
+                        Officer Login
+                    </a>
+                    <a href="{{ url_for('register') }}" class="flex-1 text-center py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                        Staff Register
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. Admin Station Card -->
+            <div class="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm hover:shadow-lg transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center mb-6 group-hover:scale-110 transition">
+                        <i data-lucide="shield-check" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">District / Mandal Authority</span>
+                    <h3 class="text-xl font-bold text-slate-900 mt-3 mb-2">Admin Station</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                        District Nodal Officers manage Sachivalayam personnel permissions, evaluate registrations, and oversee grievance SLA metrics.
+                    </p>
+                    <ul class="text-xs text-slate-600 space-y-2.5 mb-6">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            <strong class="text-purple-700">Approve or Reject Officer Registrations</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Toggle & manage officer dashboard access
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            Global district & secretariat oversight
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex gap-2 pt-4 border-t border-slate-100">
+                    <a href="{{ url_for('login') }}" class="w-full text-center py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition">
+                        Admin Portal Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How the Citizen-Confirmed Resolution Flow Works -->
+    <div class="bg-gradient-to-r from-slate-900 to-govblue-950 rounded-3xl p-8 sm:p-10 text-white border border-slate-800 shadow-xl">
+        <div class="max-w-3xl mb-8">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Workflow Architecture</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Why Complaints Can't Be Closed Without You</h2>
+            <p class="text-sm text-slate-300 mt-2">
+                Traditional portals let officers unilaterally close tickets. In this Sachivalayam system, true transparency is guaranteed:
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+            <!-- Step 1 -->
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-5 relative">
+                <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold flex items-center justify-center mb-3">1</div>
+                <h4 class="font-bold text-sm text-white mb-1">Citizen Lodges Request</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Citizen files grievance or applies for certificate renewal with details & ward location.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-5 relative">
+                <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold flex items-center justify-center mb-3">2</div>
+                <h4 class="font-bold text-sm text-white mb-1">Officer Assigned</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Approved Sachivalayam Officer picks up request, inspects site, and moves to In Progress.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 relative">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold flex items-center justify-center mb-3">3</div>
+                <h4 class="font-bold text-sm text-amber-300 mb-1">Officer Submits Work</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Officer marks work done. Status moves to <strong>Pending Citizen Confirmation</strong>.
+                </p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 relative">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold flex items-center justify-center mb-3">4</div>
+                <h4 class="font-bold text-sm text-emerald-300 mb-1">Citizen Confirms "DONE"</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Citizen checks site/certificate. If satisfied, clicks Accept &rarr; officially sealed as <strong>DONE</strong>!
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Account Status - Sachivalayam Officer Desk{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-10">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        
+        {% if user.approval_status == 'pending' %}
+            <!-- Pending State -->
+            <div class="p-8 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-center">
+                <div class="w-16 h-16 rounded-3xl bg-white/20 text-white flex items-center justify-center mx-auto mb-4 border border-white/30 backdrop-blur-sm animate-pulse">
+                    <i data-lucide="clock" class="w-8 h-8"></i>
+                </div>
+                <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/20 text-white border border-white/30">Status: Pending Verification</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold mt-3">Account Awaiting Admin Approval</h1>
+                <p class="text-xs text-amber-100 mt-2 max-w-md mx-auto">
+                    Your registration as a Sachivalayam Officer has been recorded. Administrative permissions must be granted by the District Nodal Admin before you can access your dashboard.
+                </p>
+            </div>
+
+            <div class="p-8 space-y-6">
+                <div class="bg-amber-50/60 rounded-2xl p-5 border border-amber-200/80 space-y-3 text-xs">
+                    <div class="flex justify-between pb-2 border-b border-amber-200/60">
+                        <span class="text-slate-500">Applicant Officer Name:</span>
+                        <span class="font-bold text-slate-800">{{ user.name }}</span>
+                    </div>
+                    <div class="flex justify-between pb-2 border-b border-amber-200/60">
+                        <span class="text-slate-500">Official Designation:</span>
+                        <span class="font-bold text-slate-800">{{ user.designation or 'Officer' }}</span>
+                    </div>
+                    <div class="flex justify-between pb-2 border-b border-amber-200/60">
+                        <span class="text-slate-500">Employee ID / CFMS:</span>
+                        <span class="font-mono font-bold text-slate-800">{{ user.employee_id or 'AP-PENDING' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Registered On:</span>
+                        <span class="font-mono text-slate-800">{{ user.created_at }}</span>
+                    </div>
+                </div>
+
+                <!-- Official Department Notice -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                    <div class="flex items-center gap-2 text-slate-800 font-bold mb-1">
+                        <i data-lucide="shield" class="w-4 h-4 text-govblue-600"></i>
+                        <span>Security & Verification Policy</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        In accordance with Andhra Pradesh Grama/Ward Sachivalayam administrative protocols, all secretariat staff accounts must be verified and authorized by the District Nodal Officer or Mandal Revenue Office. You will be notified once access is granted.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
+                    <a href="{{ url_for('officer_pending') }}" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs text-center transition flex items-center justify-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Check Status (Refresh)
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="flex-1 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs text-center transition flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+
+        {% elif user.approval_status == 'rejected' %}
+            <!-- Rejected State -->
+            <div class="p-8 bg-gradient-to-r from-rose-600 to-rose-700 text-white text-center">
+                <div class="w-16 h-16 rounded-3xl bg-white/20 text-white flex items-center justify-center mx-auto mb-4 border border-white/30 backdrop-blur-sm">
+                    <i data-lucide="x-circle" class="w-8 h-8"></i>
+                </div>
+                <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/20 text-white border border-white/30">Status: Rejected</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold mt-3">Registration Not Approved</h1>
+                <p class="text-xs text-rose-100 mt-2 max-w-md mx-auto">
+                    The District Nodal Admin has reviewed and declined this officer registration.
+                </p>
+            </div>
+
+            <div class="p-8 space-y-6">
+                <div class="p-5 rounded-2xl bg-rose-50 border border-rose-200 text-xs">
+                    <strong class="text-rose-900 font-bold block mb-1">Reason for Rejection:</strong>
+                    <p class="text-rose-800">{{ user.rejection_reason or 'Credentials could not be verified against departmental records.' }}</p>
+                </div>
+
+                <div class="text-center pt-4">
+                    <a href="{{ url_for('logout') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs transition">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out & Contact District Nodal Office
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

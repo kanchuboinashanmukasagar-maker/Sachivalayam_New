@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block title %}Officer Desk - Sachivalayam Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8 py-4">
+
+    <!-- Officer Profile & Secretariat Banner -->
+    <div class="bg-gradient-to-r from-emerald-950 via-emerald-900 to-govblue-950 rounded-3xl p-6 sm:p-8 text-white border border-emerald-800 shadow-xl flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Sachivalayam Officer Desk
+                </span>
+                <span class="text-xs text-emerald-300 font-mono">{{ session.get('sachivalayam_name') }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">{{ session.get('name') }}</h1>
+            <p class="text-xs sm:text-sm text-emerald-200 mt-1">
+                {{ session.get('designation') or 'Sachivalayam Official' }} &bull; Authorized by District Administration
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 text-xs font-bold">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Admin Verified & Approved
+            </span>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="text-3xl font-black text-slate-800">{{ metrics.total_complaints }}</div>
+            <div class="text-xs font-bold text-slate-700 mt-1">Assigned Grievances</div>
+            <div class="text-[11px] text-amber-600 font-semibold">{{ metrics.pending_complaints }} Active / In Progress</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-amber-300/80 shadow-sm">
+            <div class="text-3xl font-black text-amber-600">{{ metrics.awaiting_citizen_complaints + metrics.awaiting_citizen_certs }}</div>
+            <div class="text-xs font-bold text-slate-700 mt-1">Pending Citizen Confirmation</div>
+            <div class="text-[11px] text-slate-400">Work submitted & awaiting sign-off</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="text-3xl font-black text-purple-600">{{ metrics.total_certificates }}</div>
+            <div class="text-xs font-bold text-slate-700 mt-1">Certificate Requests</div>
+            <div class="text-[11px] text-purple-600 font-semibold">{{ metrics.pending_certificates }} To Verify</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="text-3xl font-black text-emerald-600">{{ metrics.done_complaints + metrics.done_certificates }}</div>
+            <div class="text-xs font-bold text-slate-700 mt-1">Officially Closed (DONE)</div>
+            <div class="text-[11px] text-slate-400">Confirmed by Citizens</div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex border-b border-slate-200 space-x-8">
+        <button onclick="switchOfficerTab('complaints')" id="btn-tab-complaints" class="pb-3 text-sm font-bold border-b-2 border-emerald-600 text-emerald-800 transition flex items-center gap-2">
+            <i data-lucide="message-square" class="w-4 h-4 text-emerald-600"></i>
+            <span>Citizen Grievances & Complaints ({{ complaints|length }})</span>
+        </button>
+        <button onclick="switchOfficerTab('certificates')" id="btn-tab-certificates" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
+            <i data-lucide="file-badge" class="w-4 h-4 text-slate-400"></i>
+            <span>Certificate Applications ({{ certificates|length }})</span>
+        </button>
+    </div>
+
+    <!-- TAB 1: GRIEVANCES & COMPLAINTS -->
+    <div id="tab-content-complaints" class="space-y-4">
+        {% if complaints %}
+            <div class="grid grid-cols-1 gap-4">
+                {% for c in complaints %}
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 hover:border-slate-300 transition">
+                        <div class="flex flex-wrap justify-between items-start gap-3 pb-4 border-b border-slate-100">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-mono font-bold text-sm text-govblue-900">{{ c.ticket_id }}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">{{ c.category }}</span>
+                                    <span class="text-xs text-slate-400 font-mono">{{ c.created_at }}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900">{{ c.title }}</h3>
+                                <p class="text-xs text-slate-600 mt-1">{{ c.description }}</p>
+                                <div class="mt-2 text-xs text-slate-500 flex flex-wrap gap-4">
+                                    <span><i data-lucide="map-pin" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i> {{ c.location }}</span>
+                                    <span><i data-lucide="user" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i> Citizen: {{ c.citizen_name }} ({{ c.citizen_phone }})</span>
+                                </div>
+                            </div>
+
+                            <!-- Current Status Badge -->
+                            <div class="text-right">
+                                {% if c.status == 'DONE' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                                        <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> DONE (CONFIRMED)
+                                    </span>
+                                {% elif c.status == 'WORK_COMPLETED_PENDING_CONFIRMATION' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs animate-pulse">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Awaiting Citizen Confirmation
+                                    </span>
+                                {% elif c.status == 'REWORK_REQUESTED' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-bold text-xs">
+                                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-600"></i> Rework Requested
+                                    </span>
+                                {% elif c.status == 'IN_PROGRESS' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-blue-600"></i> IN PROGRESS
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-xs">
+                                        SUBMITTED
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Citizen Rework Feedback Warning (if any) -->
+                        {% if c.status == 'REWORK_REQUESTED' and c.citizen_feedback %}
+                            <div class="mt-4 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs">
+                                <div class="flex items-center gap-2 text-rose-900 font-bold mb-1">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i>
+                                    <span>Citizen Feedback (Why work was not accepted):</span>
+                                </div>
+                                <p class="text-rose-800">{{ c.citizen_feedback }}</p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Officer resolution notes (if submitted) -->
+                        {% if c.officer_resolution_notes %}
+                            <div class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                                <span class="font-bold text-slate-700 block mb-1">Submitted Resolution Details:</span>
+                                <p class="text-slate-600">{{ c.officer_resolution_notes }}</p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Action Form to Update Status -->
+                        {% if c.status != 'DONE' %}
+                            <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Update Work Status:</span>
+                                <div class="flex items-center gap-2">
+                                    <!-- In Progress Button -->
+                                    {% if c.status != 'IN_PROGRESS' and c.status != 'WORK_COMPLETED_PENDING_CONFIRMATION' %}
+                                        <form action="{{ url_for('officer_update_complaint', complaint_id=c.id) }}" method="POST" class="inline">
+                                            <input type="hidden" name="status" value="IN_PROGRESS">
+                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 transition">
+                                                Start Work (In Progress)
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    <!-- Work Completed Button (Opens modal or submits notes) -->
+                                    <button type="button" onclick="openComplaintModal('{{ c.id }}', '{{ c.ticket_id }}', '{{ c.title }}')" 
+                                            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                        <span>Submit Work Completed</span>
+                                    </button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-emerald-800 flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Verified & officially closed by citizen on {{ c.completed_at }}. Sign-off: "{{ c.citizen_feedback }}"</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-12 text-center text-slate-400 bg-white rounded-3xl border border-slate-200">
+                <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+                <p class="font-bold text-slate-700">No grievances assigned yet</p>
+                <p class="text-xs text-slate-400">New citizen complaints in your secretariat will show up here.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- TAB 2: CERTIFICATES -->
+    <div id="tab-content-certificates" class="space-y-4 hidden">
+        {% if certificates %}
+            <div class="grid grid-cols-1 gap-4">
+                {% for cert in certificates %}
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 hover:border-slate-300 transition">
+                        <div class="flex flex-wrap justify-between items-start gap-3 pb-4 border-b border-slate-100">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-mono font-bold text-sm text-govblue-900">{{ cert.application_no }}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase {{ 'bg-purple-100 text-purple-800' if cert.service_type == 'renewal' else 'bg-blue-100 text-blue-800' }}">
+                                        {{ cert.service_type }} Certificate
+                                    </span>
+                                    <span class="text-xs text-slate-400 font-mono">{{ cert.created_at }}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900">{{ cert.certificate_type }}</h3>
+                                <p class="text-xs text-slate-600 mt-1">
+                                    Applicant: <strong class="text-slate-800">{{ cert.applicant_name }}</strong> 
+                                    ({{ cert.relation_type }}: {{ cert.relation_name or 'N/A' }})
+                                </p>
+                                <div class="mt-2 text-xs text-slate-500 flex flex-wrap gap-4">
+                                    {% if cert.annual_income %}
+                                        <span><i data-lucide="indian-rupee" class="w-3.5 h-3.5 inline text-slate-400"></i> Annual Income: Rs. {{ "{:,.2f}".format(cert.annual_income) }}</span>
+                                    {% endif %}
+                                    {% if cert.caste_category %}
+                                        <span><i data-lucide="tag" class="w-3.5 h-3.5 inline text-slate-400"></i> Category: {{ cert.caste_category }}</span>
+                                    {% endif %}
+                                    {% if cert.previous_cert_no %}
+                                        <span class="text-purple-700 font-bold"><i data-lucide="history" class="w-3.5 h-3.5 inline text-purple-500"></i> Renewal for: {{ cert.previous_cert_no }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Current Status Badge -->
+                            <div class="text-right">
+                                {% if cert.status == 'DONE' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                                        <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> DONE (CERTIFICATE ISSUED)
+                                    </span>
+                                {% elif cert.status == 'WORK_COMPLETED_PENDING_CONFIRMATION' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs animate-pulse">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Awaiting Citizen Confirmation
+                                    </span>
+                                {% elif cert.status == 'REWORK_REQUESTED' %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-bold text-xs">
+                                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-600"></i> Correction Requested
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                                        {{ cert.status }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Uploaded Verification Proofs (For Officer Review) -->
+                        {% if cert.applicant_photo or cert.income_proof_doc or cert.caste_proof_doc or cert.supporting_doc %}
+                            <div class="mt-4 p-4 rounded-2xl bg-purple-50/50 border border-purple-200/80">
+                                <span class="text-xs font-bold text-purple-950 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5 text-purple-600"></i>
+                                    Citizen Uploaded Verification Documents & Photos:
+                                </span>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    {% if cert.applicant_photo %}
+                                        <a href="{{ url_for('static', filename=cert.applicant_photo) }}" target="_blank" class="group flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-white border border-purple-200 hover:border-purple-400 shadow-sm transition">
+                                            <img src="{{ url_for('static', filename=cert.applicant_photo) }}" alt="Applicant" class="w-8 h-8 rounded-lg object-cover border border-slate-200">
+                                            <div class="text-left">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-purple-700">Applicant Photo</div>
+                                                <div class="text-[10px] text-slate-400">Click to expand</div>
+                                            </div>
+                                        </a>
+                                    {% endif %}
+                                    {% if cert.caste_proof_doc %}
+                                        <a href="{{ url_for('static', filename=cert.caste_proof_doc) }}" target="_blank" class="flex items-center gap-2 p-2 px-3 rounded-xl bg-white border border-amber-200 hover:border-amber-400 shadow-sm transition text-xs font-bold text-amber-800">
+                                            <i data-lucide="file-check" class="w-4 h-4 text-amber-600"></i>
+                                            <span>View Caste Proof Photo</span>
+                                        </a>
+                                    {% endif %}
+                                    {% if cert.income_proof_doc %}
+                                        <a href="{{ url_for('static', filename=cert.income_proof_doc) }}" target="_blank" class="flex items-center gap-2 p-2 px-3 rounded-xl bg-white border border-emerald-200 hover:border-emerald-400 shadow-sm transition text-xs font-bold text-emerald-800">
+                                            <i data-lucide="file-text" class="w-4 h-4 text-emerald-600"></i>
+                                            <span>View Income Proof Photo</span>
+                                        </a>
+                                    {% endif %}
+                                    {% if cert.supporting_doc %}
+                                        <a href="{{ url_for('static', filename=cert.supporting_doc) }}" target="_blank" class="flex items-center gap-2 p-2 px-3 rounded-xl bg-white border border-blue-200 hover:border-blue-400 shadow-sm transition text-xs font-bold text-blue-800">
+                                            <i data-lucide="paperclip" class="w-4 h-4 text-blue-600"></i>
+                                            <span>Prior Certificate / Address Doc</span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if cert.status == 'REWORK_REQUESTED' and cert.citizen_feedback %}
+                            <div class="mt-4 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs">
+                                <span class="text-rose-900 font-bold block mb-1">Citizen Correction Request:</span>
+                                <p class="text-rose-800">{{ cert.citizen_feedback }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if cert.officer_remarks %}
+                            <div class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                                <span class="font-bold text-slate-700 block mb-1">Officer Inquiry Findings:</span>
+                                <p class="text-slate-600">{{ cert.officer_remarks }}</p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Application Action:</span>
+                            <div class="flex items-center gap-2">
+                                {% if cert.status != 'DONE' %}
+                                    <button type="button" onclick="openCertModal('{{ cert.id }}', '{{ cert.application_no }}', '{{ cert.certificate_type }}', '{{ cert.applicant_name }}')"
+                                            class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                                        <span>Issue & Mark Completed</span>
+                                    </button>
+                                {% else %}
+                                    <a href="{{ url_for('view_certificate', application_no=cert.application_no) }}" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                                        <span>View Generated Certificate</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-12 text-center text-slate-400 bg-white rounded-3xl border border-slate-200">
+                <i data-lucide="file-text" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+                <p class="font-bold text-slate-700">No certificate applications yet</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MODAL: Submit Complaint Work Resolution -->
+<div id="complaint-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-4">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+            <div>
+                <span class="text-xs font-mono font-bold text-govblue-600" id="modal-ticket-id">GS-CMP</span>
+                <h3 class="text-lg font-bold text-slate-900">Submit Work Completion</h3>
+            </div>
+            <button onclick="closeComplaintModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+            <i data-lucide="info" class="w-4 h-4 inline mr-1 text-amber-600"></i>
+            <strong>Important Workflow Rule:</strong> Submitting work completion sets the status to <em>Pending Citizen Confirmation</em>. The grievance is marked <strong>DONE</strong> only after the citizen reviews and approves it.
+        </div>
+
+        <form id="complaint-form" method="POST">
+            <input type="hidden" name="status" value="WORK_COMPLETED">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Field Inspection & Resolution Details *</label>
+                <textarea name="notes" rows="4" required placeholder="Describe what repair/work was done on site so the citizen can inspect and verify..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-4">
+                <button type="button" onclick="closeComplaintModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">Cancel</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i> Submit for Citizen Sign-off
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Submit Certificate Completion -->
+<div id="cert-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-4">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+            <div>
+                <span class="text-xs font-mono font-bold text-purple-600" id="modal-app-no">GS-CRT</span>
+                <h3 class="text-lg font-bold text-slate-900">Approve & Issue Certificate Draft</h3>
+            </div>
+            <button onclick="closeCertModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-xs text-purple-900">
+            <i data-lucide="file-check" class="w-4 h-4 inline mr-1 text-purple-600"></i>
+            This generates the official digital certificate payload and notifies the citizen to verify details before marking as <strong>DONE</strong>.
+        </div>
+
+        <form id="cert-form" method="POST">
+            <input type="hidden" name="status" value="WORK_COMPLETED">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Officer Verification Findings & Remarks *</label>
+                <textarea name="remarks" rows="4" required placeholder="e.g. Field verification conducted by VRO; documents found genuine. Approved for issuance..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-4">
+                <button type="button" onclick="closeCertModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">Cancel</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Release to Citizen for Sign-off
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function switchOfficerTab(tab) {
+        const compTab = document.getElementById('tab-content-complaints');
+        const certTab = document.getElementById('tab-content-certificates');
+        const compBtn = document.getElementById('btn-tab-complaints');
+        const certBtn = document.getElementById('btn-tab-certificates');
+
+        if (tab === 'certificates') {
+            compTab.classList.add('hidden');
+            certTab.classList.remove('hidden');
+            certBtn.className = "pb-3 text-sm font-bold border-b-2 border-emerald-600 text-emerald-800 transition flex items-center gap-2";
+            compBtn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2";
+        } else {
+            certTab.classList.add('hidden');
+            compTab.classList.remove('hidden');
+            compBtn.className = "pb-3 text-sm font-bold border-b-2 border-emerald-600 text-emerald-800 transition flex items-center gap-2";
+            certBtn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2";
+        }
+        lucide.createIcons();
+    }
+
+    function openComplaintModal(id, ticketId, title) {
+        document.getElementById('modal-ticket-id').textContent = ticketId + " - " + title;
+        document.getElementById('complaint-form').action = "/officer/complaints/" + id + "/update";
+        document.getElementById('complaint-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeComplaintModal() {
+        document.getElementById('complaint-modal').classList.add('hidden');
+    }
+
+    function openCertModal(id, appNo, certType, applicant) {
+        document.getElementById('modal-app-no').textContent = appNo + " (" + certType + " - " + applicant + ")";
+        document.getElementById('cert-form').action = "/officer/certificates/" + id + "/update";
+        document.getElementById('cert-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeCertModal() {
+        document.getElementById('cert-modal').classList.add('hidden');
+    }
+</script>
+{% endblock %}
